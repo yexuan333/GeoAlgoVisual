@@ -1,5 +1,5 @@
-#ifndef RBTREE_H__
-#define RBTREE_H__
+#ifndef RBTree_H__
+#define RBTree_H__
 
 #include <iostream>
 #include <memory>
@@ -16,77 +16,64 @@ const auto LEFT_CHILD = 0;
 const auto RIGHT_CHILD = 1;
 
 template<typename T>
-class rb_tree_node
+class RBTreeNode
 {
 public:
-	rb_tree_node(const T& data, int color)
-		: data_(data)
-		, color_(color)
-		, parent_(nullptr)
-		, l_child_(nullptr)
-		, r_child_(nullptr)
-	{
-
-	}
+	RBTreeNode(const T& data, int color)
+		: Data(data)
+		, Color(color)
+		, Parent(nullptr)
+		, LChild(nullptr)
+		, RChild(nullptr)
+	{}
 
 public:
-	T		data_;
-	int		color_;
-	rb_tree_node* parent_;
-	rb_tree_node* l_child_;
-	rb_tree_node* r_child_;
+	T		Data;
+	int		Color;
+	RBTreeNode* Parent;
+	RBTreeNode* LChild;
+	RBTreeNode* RChild;
 };
 
 template<typename T>
-class rb_tree
+class RBTree
 {
 public:
-	typedef T			value_type;
-	typedef const value_type& const_ref_type;
-	typedef rb_tree_node<T>		node_value_type;
-	typedef rb_tree_node<T>* node_pointer;
-	typedef const node_pointer	const_node_pointer;
+	RBTree(): m_root(nullptr){}
 
-public:
-	rb_tree()
-		: root_(nullptr)
+	int insert(const T& data)
 	{
-
-	}
-
-	int insert(const_ref_type data)
-	{
-		if (nullptr == this->root_)
+		if (!m_root)
 		{
-			this->root_ = new node_value_type(data, BLACK);
+			this->m_root = new RBTreeNode<T>(data, BLACK);
 			return 0;
 		}
 
-		return insert_node(nullptr, LEFT_CHILD, this->root_, data);
+		return insert_node(nullptr, LEFT_CHILD, this->m_root, data);
 	}
 
-	int erase(const_ref_type data)
+	int erase(const T& data)
 	{
-		if (nullptr == this->root_)
+		if (nullptr == this->m_root)
 			return -1;
-		return erase_node(nullptr, LEFT_CHILD, this->root_, data);
+		return erase_node(nullptr, LEFT_CHILD, this->m_root, data);
 	}
 
 	void dump()
 	{
-		mid_visit_node(this->root_);
+		mid_visit_node(this->m_root);
 	}
 
 	int height()
 	{
-		return this->height_i(this->root_);
+		return this->height_i(this->m_root);
 	}
 
 	void check_rb_feature_5()
 	{
 		std::list<int> list;
 		char trace[100] = { 0 };
-		check_rb_feature_5_impl(nullptr, this->root_, trace, 0, list);
+		check_rb_feature_5_impl(nullptr, this->m_root, trace, 0, list);
 		int len = -1;
 		for (auto it = list.begin(); it != list.end(); ++it)
 		{
@@ -103,74 +90,74 @@ public:
 	}
 
 private:
-	int insert_node(node_pointer pp, int pp_child_tag, node_pointer p, const_ref_type data)
+	int insert_node(RBTreeNode<T>* pp, int pp_child_tag, RBTreeNode<T>* p, const T& data)
 	{
 		if (nullptr == p)
 		{
-			p = new node_value_type(data, RED);
-			LEFT_CHILD == pp_child_tag ? pp->l_child_ = p : pp->r_child_ = p;
-			p->parent_ = pp;
-			if (RED == pp->color_)
+			p = new RBTreeNode<T>(data, RED);
+			LEFT_CHILD == pp_child_tag ? pp->LChild = p : pp->RChild = p;
+			p->Parent = pp;
+			if (RED == pp->Color)
 				this->adjust_balance(p);
 			return 0;
 		}
-		else if (p->data_ == data)
+		else if (p->Data == data)
 			return -1;
-		else if (data < p->data_)
-			return this->insert_node(p, LEFT_CHILD, p->l_child_, data);
+		else if (data < p->Data)
+			return this->insert_node(p, LEFT_CHILD, p->LChild, data);
 		else
-			return this->insert_node(p, RIGHT_CHILD, p->r_child_, data);
+			return this->insert_node(p, RIGHT_CHILD, p->RChild, data);
 	}
 
-	int erase_node(node_pointer pp, int pp_child_tag, node_pointer p, const_ref_type data)
+	int erase_node(RBTreeNode<T>* pp, int pp_child_tag, RBTreeNode<T>* p, const T& data)
 	{
 		if (nullptr == p)
 			return -1;
-		else if (p->data_ == data)
+		else if (p->Data == data)
 		{
-			node_pointer fake_null = nullptr;
-			int delete_node_color = p->color_;
-			node_pointer& ref_p = (pp ? (LEFT_CHILD == pp_child_tag ? pp->l_child_ : pp->r_child_) : this->root_);
+			RBTreeNode<T>* fake_null = nullptr;
+			int delete_node_color = p->Color;
+			RBTreeNode<T>*& ref_p = (pp ? (LEFT_CHILD == pp_child_tag ? pp->LChild : pp->RChild) : this->m_root);
 
-			if (p->l_child_ && p->r_child_)
+			if (p->LChild && p->RChild)
 			{
-				auto prev = p->l_child_;
+				auto prev = p->LChild;
 				auto curr = prev;
-				for (; curr && curr->r_child_; prev = curr, curr = curr->r_child_);
-				delete_node_color = curr->color_;
+				for (; curr && curr->RChild; prev = curr, curr = curr->RChild);
+				delete_node_color = curr->Color;
 				if (curr == prev)
 				{
-					p->data_ = curr->data_;
-					p->l_child_ = curr->l_child_;
-					if (curr->l_child_)
-						curr->l_child_->parent_ = p;
+					p->Data = curr->Data;
+					p->LChild = curr->LChild;
+					if (curr->LChild)
+						curr->LChild->Parent = p;
 					pp = p;
-					p = p->l_child_;
+					p = p->LChild;
 					pp_child_tag = LEFT_CHILD;
 					delete curr;
 				}
 				else
 				{
-					p->data_ = curr->data_;
+					p->Data = curr->Data;
 					pp = prev;
 					pp_child_tag = RIGHT_CHILD;
-					p = prev->r_child_ = curr->l_child_;
-					if (curr->l_child_)
-						curr->l_child_->parent_ = prev;
+					p = prev->RChild = curr->LChild;
+					if (curr->LChild)
+						curr->LChild->Parent = prev;
 					delete curr;
 				}
 			}
-			else if (p->l_child_)
+			else if (p->LChild)
 			{
-				ref_p = p->l_child_;
-				p->l_child_->parent_ = pp;
+				ref_p = p->LChild;
+				p->LChild->Parent = pp;
 				delete p;
 				p = ref_p;
 			}
-			else if (p->r_child_)
+			else if (p->RChild)
 			{
-				ref_p = p->r_child_;
-				p->r_child_->parent_ = pp;
+				ref_p = p->RChild;
+				p->RChild->Parent = pp;
 				delete p;
 				p = ref_p;
 			}
@@ -183,233 +170,233 @@ private:
 			{
 				if (nullptr == p)
 				{
-					fake_null = p = new node_value_type(NULL_NODE, BLACK);
-					p->parent_ = pp;
-					LEFT_CHILD == pp_child_tag ? pp->l_child_ = p : pp->r_child_ = p;
+					fake_null = p = new RBTreeNode<T>(NULL_NODE, BLACK);
+					p->Parent = pp;
+					LEFT_CHILD == pp_child_tag ? pp->LChild = p : pp->RChild = p;
 				}
 
 				this->adjust_delete_balance(pp, p);
 				if (fake_null)
 				{
-					if (fake_null->parent_->l_child_ == fake_null)
-						fake_null->parent_->l_child_ = nullptr;
+					if (fake_null->Parent->LChild == fake_null)
+						fake_null->Parent->LChild = nullptr;
 					else
-						fake_null->parent_->r_child_ = nullptr;
+						fake_null->Parent->RChild = nullptr;
 					delete fake_null;
 				}
 			}
 			return 0;
 		}
-		else if (data < p->data_)
-			return this->erase_node(p, LEFT_CHILD, p->l_child_, data);
+		else if (data < p->Data)
+			return this->erase_node(p, LEFT_CHILD, p->LChild, data);
 		else
-			return this->erase_node(p, RIGHT_CHILD, p->r_child_, data);
+			return this->erase_node(p, RIGHT_CHILD, p->RChild, data);
 	}
 
 private:
-	void adjust_balance(node_pointer p)
+	void adjust_balance(RBTreeNode<T>* p)
 	{
-		while (p->parent_ && p->parent_->parent_ && RED == p->parent_->color_)
+		while (p->Parent && p->Parent->Parent && RED == p->Parent->Color)
 		{
-			auto pp = p->parent_;
-			auto gp = pp->parent_;
-			auto up = (gp->l_child_ == pp ? gp->r_child_ : gp->l_child_);
-			if (gp->l_child_ == pp)
+			auto pp = p->Parent;
+			auto gp = pp->Parent;
+			auto up = (gp->LChild == pp ? gp->RChild : gp->LChild);
+			if (gp->LChild == pp)
 			{
-				if (up && RED == up->color_)
+				if (up && RED == up->Color)
 				{
-					pp->color_ = up->color_ = BLACK;
-					gp->color_ = RED;
+					pp->Color = up->Color = BLACK;
+					gp->Color = RED;
 					p = gp;
 				}
 				else
 				{
-					if (pp->r_child_ == p)
+					if (pp->RChild == p)
 					{
 						this->l_rotate(pp);
 						swap(p, pp);
 					}
 
-					pp->color_ = BLACK;
-					gp->color_ = RED;
+					pp->Color = BLACK;
+					gp->Color = RED;
 					this->r_rotate(gp);
 				}
 			}
 			else
 			{
-				if (up && RED == up->color_)
+				if (up && RED == up->Color)
 				{
-					pp->color_ = up->color_ = BLACK;
-					gp->color_ = RED;
+					pp->Color = up->Color = BLACK;
+					gp->Color = RED;
 					p = gp;
 				}
 				else
 				{
-					if (pp->l_child_ == p)
+					if (pp->LChild == p)
 					{
 						this->r_rotate(pp);
 						swap(p, pp);
 					}
 
-					pp->color_ = BLACK;
-					gp->color_ = RED;
+					pp->Color = BLACK;
+					gp->Color = RED;
 					this->l_rotate(gp);
 				}
 			}
 		}
 
-		this->root_->color_ = BLACK;
+		this->m_root->Color = BLACK;
 	}
 
-	void adjust_delete_balance(node_pointer pp, node_pointer p)
+	void adjust_delete_balance(RBTreeNode<T>* pp, RBTreeNode<T>* p)
 	{
-		while ((nullptr == p || BLACK == p->color_) && p != this->root_)
+		while ((nullptr == p || BLACK == p->Color) && p != this->m_root)
 		{
-			if (pp->l_child_ == p)
+			if (pp->LChild == p)
 			{
-				auto s = pp->r_child_;
-				if (s && RED == s->color_)
+				auto s = pp->RChild;
+				if (s && RED == s->Color)
 				{
-					s->color_ = BLACK;
-					pp->color_ = RED;
+					s->Color = BLACK;
+					pp->Color = RED;
 					this->l_rotate(pp);
-					s = pp->r_child_;
+					s = pp->RChild;
 				}
 
-				if ((nullptr == s->l_child_ || BLACK == s->l_child_->color_)
-					&& (nullptr == s->r_child_ || BLACK == s->r_child_->color_))
+				if ((nullptr == s->LChild || BLACK == s->LChild->Color)
+					&& (nullptr == s->RChild || BLACK == s->RChild->Color))
 				{
-					s->color_ = RED;
+					s->Color = RED;
 					p = pp;
-					pp = p->parent_;
+					pp = p->Parent;
 				}
 				else
 				{
-					if (nullptr == s->r_child_ || BLACK == s->r_child_->color_)
+					if (nullptr == s->RChild || BLACK == s->RChild->Color)
 					{
-						s->l_child_ ? s->l_child_->color_ = BLACK : 0;
-						s->color_ = RED;
+						s->LChild ? s->LChild->Color = BLACK : 0;
+						s->Color = RED;
 						this->r_rotate(s);
-						s = pp->r_child_;
+						s = pp->RChild;
 					}
 
-					s->color_ = pp->color_;
-					pp->color_ = BLACK;
-					s->r_child_->color_ = BLACK;
+					s->Color = pp->Color;
+					pp->Color = BLACK;
+					s->RChild->Color = BLACK;
 					this->l_rotate(pp);
-					p = this->root_;
+					p = this->m_root;
 				}
 			}
 			else
 			{
-				auto s = pp->l_child_;
-				if (s && RED == s->color_)
+				auto s = pp->LChild;
+				if (s && RED == s->Color)
 				{
-					s->color_ = BLACK;
-					pp->color_ = RED;
+					s->Color = BLACK;
+					pp->Color = RED;
 					this->r_rotate(pp);
-					s = pp->l_child_;
+					s = pp->LChild;
 				}
 
-				if ((nullptr == s->l_child_ || BLACK == s->l_child_->color_)
-					&& (nullptr == s->r_child_ || BLACK == s->r_child_->color_))
+				if ((nullptr == s->LChild || BLACK == s->LChild->Color)
+					&& (nullptr == s->RChild || BLACK == s->RChild->Color))
 				{
-					s->color_ = RED;
+					s->Color = RED;
 					p = pp;
-					pp = p->parent_;
+					pp = p->Parent;
 				}
 				else
 				{
-					if (nullptr == s->l_child_ || BLACK == s->l_child_->color_)
+					if (nullptr == s->LChild || BLACK == s->LChild->Color)
 					{
-						s->r_child_ ? s->r_child_->color_ = BLACK : 0;
-						s->color_ = RED;
+						s->RChild ? s->RChild->Color = BLACK : 0;
+						s->Color = RED;
 						this->l_rotate(s);
-						s = pp->l_child_;
+						s = pp->LChild;
 					}
 
-					s->color_ = pp->color_;
-					pp->color_ = BLACK;
-					s->l_child_->color_ = BLACK;
+					s->Color = pp->Color;
+					pp->Color = BLACK;
+					s->LChild->Color = BLACK;
 					this->r_rotate(pp);
-					p = this->root_;
+					p = this->m_root;
 				}
 			}
 		}
 
-		p->color_ = BLACK;
+		p->Color = BLACK;
 	}
 
 private:
-	node_pointer l_rotate(node_pointer p)
+	RBTreeNode<T>* l_rotate(RBTreeNode<T>* p)
 	{
-		auto lr = p->r_child_;
-		p->r_child_ = lr->l_child_;
-		if (lr->l_child_)
-			lr->l_child_->parent_ = p;
+		auto lr = p->RChild;
+		p->RChild = lr->LChild;
+		if (lr->LChild)
+			lr->LChild->Parent = p;
 
-		lr->parent_ = p->parent_;
-		if (nullptr == p->parent_)
-			this->root_ = lr;
-		else if (p->parent_->l_child_ == p)
-			p->parent_->l_child_ = lr;
+		lr->Parent = p->Parent;
+		if (nullptr == p->Parent)
+			this->m_root = lr;
+		else if (p->Parent->LChild == p)
+			p->Parent->LChild = lr;
 		else
-			p->parent_->r_child_ = lr;
+			p->Parent->RChild = lr;
 
-		lr->l_child_ = p;
-		p->parent_ = lr;
+		lr->LChild = p;
+		p->Parent = lr;
 
 		return lr;
 	}
 
-	node_pointer r_rotate(node_pointer p)
+	RBTreeNode<T>* r_rotate(RBTreeNode<T>* p)
 	{
-		auto lc = p->l_child_;
-		p->l_child_ = lc->r_child_;
-		if (lc->r_child_)
-			lc->r_child_->parent_ = p;
+		auto lc = p->LChild;
+		p->LChild = lc->RChild;
+		if (lc->RChild)
+			lc->RChild->Parent = p;
 
-		lc->parent_ = p->parent_;
-		if (nullptr == p->parent_)
-			this->root_ = lc;
-		else if (p->parent_->l_child_ == p)
-			p->parent_->l_child_ = lc;
+		lc->Parent = p->Parent;
+		if (nullptr == p->Parent)
+			this->m_root = lc;
+		else if (p->Parent->LChild == p)
+			p->Parent->LChild = lc;
 		else
-			p->parent_->r_child_ = lc;
+			p->Parent->RChild = lc;
 
-		lc->r_child_ = p;
-		p->parent_ = lc;
+		lc->RChild = p;
+		p->Parent = lc;
 
 		return lc;
 	}
 
-	int height_i(node_pointer p)
+	int height_i(RBTreeNode<T>* p)
 	{
 		if (nullptr == p)
 			return 0;
 
 		int left_height = 0;
-		if (p->l_child_)
-			left_height = height_i(p->l_child_) + 1;
+		if (p->LChild)
+			left_height = height_i(p->LChild) + 1;
 
 		int right_height = 0;
-		if (p->r_child_)
-			right_height = height_i(p->r_child_) + 1;
+		if (p->RChild)
+			right_height = height_i(p->RChild) + 1;
 
 		return left_height >= right_height ? left_height : right_height;
 	}
 
-	void mid_visit_node(const_node_pointer p)
+	void mid_visit_node(const RBTreeNode<T>* p)
 	{
 		if (nullptr != p)
 		{
-			mid_visit_node(p->l_child_);
-			std::cout << p->data_ << std::endl;
-			mid_visit_node(p->r_child_);
+			mid_visit_node(p->LChild);
+			std::cout << p->Data << std::endl;
+			mid_visit_node(p->RChild);
 		}
 	}
 
-	void check_rb_feature_5_impl(node_pointer pp, node_pointer p, char trace[], int idx, std::list<int>& list)
+	void check_rb_feature_5_impl(RBTreeNode<T>* pp, RBTreeNode<T>* p, char trace[], int idx, std::list<int>& list)
 	{
 		if (nullptr == p)
 		{
@@ -425,14 +412,14 @@ private:
 		}
 		else
 		{
-			trace[idx] = p->color_;
-			check_rb_feature_5_impl(p, p->l_child_, trace, idx + 1, list);
-			check_rb_feature_5_impl(p, p->r_child_, trace, idx + 1, list);
+			trace[idx] = p->Color;
+			check_rb_feature_5_impl(p, p->LChild, trace, idx + 1, list);
+			check_rb_feature_5_impl(p, p->RChild, trace, idx + 1, list);
 		}
 	}
 
 private:
-	node_pointer	root_;
+	RBTreeNode<T>*	m_root;
 };
 
 #endif
