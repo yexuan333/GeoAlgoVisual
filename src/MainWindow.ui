@@ -27,10 +27,10 @@
    <widget class="QTextBrowser" name="textBrowser">
     <property name="geometry">
      <rect>
-      <x>230</x>
-      <y>80</y>
-      <width>256</width>
-      <height>192</height>
+      <x>180</x>
+      <y>0</y>
+      <width>771</width>
+      <height>131</height>
      </rect>
     </property>
     <property name="frameShape">

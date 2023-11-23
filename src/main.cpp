@@ -1,9 +1,9 @@
-﻿#include "RpBevel.h"
+﻿#include "MainWindow.h"
 #include <QtWidgets/QApplication>
 
 int main(int argc, char *argv[]) {
   QApplication a(argc, argv);
-  RpBevel w;
+  MainWindow w;
   w.show();
   return a.exec();
 }

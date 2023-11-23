@@ -20,12 +20,7 @@ class RBTreeNode
 {
 public:
 	RBTreeNode(const T& data, int color)
-		: Data(data)
-		, Color(color)
-		, Parent(nullptr)
-		, LChild(nullptr)
-		, RChild(nullptr)
-	{}
+		: Data(data), Color(color), Parent(nullptr), LChild(nullptr), RChild(nullptr){}
 
 public:
 	T		Data;

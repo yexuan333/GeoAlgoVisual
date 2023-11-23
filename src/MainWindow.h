@@ -20,15 +20,16 @@
 #include <QRandomGenerator>
 #include <ctime>
 #include <STEPControl_Reader.hxx>
-#include "rbTree.h"
-
-class RpBevel : public QMainWindow {
+#include "pch.h"
+#include "AIS_Point.hxx"
+#include "Geom_CartesianPoint.hxx"
+class MainWindow : public QMainWindow {
   Q_OBJECT
 
 public:
   /// @brief
   /// @param parent
-  RpBevel(QWidget *parent = nullptr);
+  MainWindow(QWidget *parent = nullptr);
 
 private:
   /// @brief
