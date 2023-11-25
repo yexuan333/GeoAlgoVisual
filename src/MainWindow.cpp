@@ -1,7 +1,4 @@
 ﻿#include "MainWindow.h"
-#include "ConvexHull_GrahamScan.h"
-#include <BRepBuilderAPI_MakePolygon.hxx>
-
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
@@ -14,12 +11,17 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->textBrowser->document()->setMaximumBlockCount(9001);
   ui->textBrowser->viewport()->setAutoFillBackground(false);
   ui->textBrowser->setTextColor(QColor(150, 150, 150));
+
+  m_logStream = new LogStream(std::cout, ui->textBrowser);
+  ui->openGLWidget->displayViewCube();
 }
 void MainWindow::Run() {
     ui->openGLWidget->Context()->EraseAll(true);
+    
+    QThread* thread = new QThread;
+
     std::vector<gp_Pnt> points;
     points.reserve(50);
-
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> dis(0, 100);
@@ -29,40 +31,26 @@ void MainWindow::Run() {
         double y = dis(gen);
         points.emplace_back(x, y, 0);
     }
+    ConvexHull_GrahamScan_V* worker = new ConvexHull_GrahamScan_V(ui->openGLWidget->Context(), points);
+    worker->moveToThread(thread);
 
-    for (auto p : points) {
-        auto ais = new AIS_Point(new Geom_CartesianPoint(p));
-        ui->openGLWidget->Context()->Display(ais,true);
-    }
+    connect(thread, &QThread::started, worker, &ConvexHull_GrahamScan_V::process);
+    connect(worker, &ConvexHull_GrahamScan_V::finished, thread, &QThread::quit);
+    connect(worker, &ConvexHull_GrahamScan_V::finished, worker, &ConvexHull_GrahamScan_V::deleteLater);
+    connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+    connect(worker, &ConvexHull_GrahamScan_V::updateView, this, &MainWindow::on_updateView);
+    connect(worker, &ConvexHull_GrahamScan_V::clearView, this, &MainWindow::on_clearView);
 
-    ConvexHull_GrahamScan op(points);
-    if (op.compute()) {
-        auto res = op.getResult();
-        BRepBuilderAPI_MakePolygon polygon;
-        for (std::size_t i = 0; i < res.size(); ++i) {
-            auto p3 = gp_Pnt(res[i].X(), res[i].Y(), 0.0);
-            polygon.Add(BRepBuilderAPI_MakeVertex(p3));
-            AIS_TextLabel* label = new AIS_TextLabel();
-            label->SetText(std::to_string(i).c_str());
-            label->SetPosition(p3);
-            ui->openGLWidget->Context()->Display(label,true);
-        }
-        auto ais_polygon = new AIS_Shape(polygon.Shape());
-        ui->openGLWidget->Context()->Display(ais_polygon, true);
-        
-    }
-    
+    thread->start();
 }
-
-
-void MainWindow::displayShape(const TopoDS_Shape &shape, bool update) {
-  Handle(AIS_Shape) aShape = new AIS_Shape(shape);
-  ui->openGLWidget->Context()->Display(aShape, AIS_Shaded, 0, update);
+void MainWindow::on_updateView() {
+    ui->openGLWidget->Context()->UpdateCurrent();
+    repaint();
 }
-
-void MainWindow::removeAll() {
-  ui->openGLWidget->Context()->RemoveAll(true);
-  ui->openGLWidget->displayViewCube();
+void MainWindow::on_clearView() {
+    ui->openGLWidget->Context()->RemoveAll(true);
+    ui->openGLWidget->displayViewCube();
+    repaint();
 }
 
 void MainWindow::setTopView() {

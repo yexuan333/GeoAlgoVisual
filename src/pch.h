@@ -1,5 +1,10 @@
 #pragma once
+#include <vector>
 #include <Adaptor3d_Curve.hxx>
+#include <AIS_InteractiveContext.hxx>
+#include <AIS_Point.hxx>
+#include <AIS_TextLabel.hxx>
+#include <AIS_Shape.hxx>
 #include <BOPAlgo_Splitter.hxx>
 #include <BRepAlgoAPI_Section.hxx>
 #include <BRepAdaptor_Curve.hxx>
@@ -10,6 +15,7 @@
 #include <BRepBuilderAPI_MakeSolid.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_MakeVertex.hxx>
+#include <BRepBuilderAPI_MakePolygon.hxx>
 #include <BRepExtrema_DistShapeShape.hxx>
 #include <BRepFill.hxx>
 #include <BRepGProp.hxx>
@@ -35,6 +41,7 @@
 #include <Geom2d_Line.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
 #include <GeomAPI.hxx>
+#include <Geom_CartesianPoint.hxx>
 #include <GeomAPI_ExtremaCurveCurve.hxx>
 #include <GeomAPI_Interpolate.hxx>
 #include <GeomAPI_ProjectPointOnSurf.hxx>
@@ -56,6 +63,7 @@
 #include <Geom_SurfaceOfLinearExtrusion.hxx>
 #include <Geom_Transformation.hxx>
 #include <Geom_TrimmedCurve.hxx>
+#include <Prs3d_PointAspect.hxx>
 #include <ShapeAnalysis_Curve.hxx>
 #include <ShapeAnalysis_Edge.hxx>
 #include <ShapeAnalysis_FreeBounds.hxx>
@@ -87,12 +95,28 @@
 #include <gp_Pln.hxx>
 #include <gp_Pnt.hxx>
 
+#include <QApplication>
+#include <QComboBox>
+#include <QDateTime>
+#include <QFileDialog>
+#include <QMutex>
+#include <QPushButton>
+#include <QScreen>
+#include <QStandardItem>
+#include <QStandardItemModel>
+#include <QStringListModel>
+#include <QSurfaceFormat>
+#include <QThread>
+#include <QtWidgets/QMainWindow>
+#include <QRandomGenerator>
+#include <Qobject>
+#include <Qtimer>
+
 #include <algorithm>
 #include <iostream>
 #include <math.h>
 #include <numeric>
 #include <unordered_map>
-#include <vector>
 
 #ifndef DllExport
 #define DllExport Standard_EXPORT
