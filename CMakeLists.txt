@@ -72,14 +72,15 @@ link_directories   (
 set (OpenCASCADE_LIBS TKRWMesh TKBinXCAF TKBin TKBinL TKOpenGl TKXCAF TKVCAF TKCAF TKV3d TKHLR TKMesh TKService TKShHealing TKPrim TKTopAlgo TKGeomAlgo TKBRep TKGeomBase TKG3d TKG2d TKMath TKLCAF TKCDF TKernel)
 
 # main project target
+set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
 file(
   GLOB
   sample_SOURCE_FILES
-  src/*.hxx
-  src/*.cxx
-  src/*.cpp
-  src/*.h
-  src/*.ui
+  ${SOURCE_DIR}/*.hxx
+  ${SOURCE_DIR}/*.cxx
+  ${SOURCE_DIR}/*.cpp
+  ${SOURCE_DIR}/*.h
+  ${SOURCE_DIR}/*.ui
   )
 qt_add_executable(${PROJECT_NAME}
 ${sample_SOURCE_FILES}
