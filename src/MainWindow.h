@@ -9,7 +9,7 @@
 #include "pch.h"
 #include "LogStream.h"
 #include "ConvexHull_GrahamScan_V.h"
-
+#include "ConvexHull3D_V.h"
 
 
 class MainWindow : public QMainWindow {
