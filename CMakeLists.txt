@@ -2,6 +2,8 @@ cmake_minimum_required (VERSION 3.2)
 
 project (GeoAlgoVisual)
 
+
+
 set (CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/adm/cmake" ${CMAKE_MODULE_PATH})
 set (APP_VERSION_MAJOR 1)
 set (APP_VERSION_MINOR 0)
@@ -33,12 +35,12 @@ elseif (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMP
     endif()
   endif()
 endif()
-# dependencies dir
-set (OpenCASCADE_DIR "D:/OpenCASCADE-7.7.0-vc14-64/opencascade-7.7.0-build" CACHE PATH "Path to Open CASCADE libraries.")
-set (3RDPARTY_DLL_DIRS "${OpenCASCADE_DIR}/../freeimage-3.17.0-vc14-64/bin;${OpenCASCADE_DIR}/../freetype-2.5.5-vc14-64/bin;${OpenCASCADE_DIR}/../ffmpeg-3.3.4-64/bin;${OpenCASCADE_DIR}/../tbb_2021.5-vc14-64/bin;" CACHE STRING "Paths to external DLLs separated by semicolon (FreeImage, FreeType, etc.)")
-set (QT_PATH "Z:/ProgramData/QT/6.5.2/msvc2019_64")
-list(APPEND CMAKE_PREFIX_PATH "${QT_PATH}/lib/cmake/Qt6/")
 
+# dependencies dir
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/env.cmake)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/env.cmake)
+endif()
+list(APPEND CMAKE_PREFIX_PATH "${QT_PATH}/lib/cmake/Qt6/")
 # Find OpenGL
 find_package (OpenGL REQUIRED)
 # Find Qt6
