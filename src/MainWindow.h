@@ -8,6 +8,7 @@
 #include <ctime>
 #include "pch.h"
 #include "LogStream.h"
+#include "GeoAlgo_V.h"
 #include "ConvexHull_GrahamScan_V.h"
 #include "ConvexHull3D_V.h"
 
@@ -22,9 +23,9 @@ public:
 
 private:
     void setTopView();
-
+    void connectAlgoThread(GeoAlgo_V* algo, QThread* thread);
 private Q_SLOTS:
-    void Run();
+    void GrahamScanRun();
     void on_updateView();
     void on_clearView();
 private:

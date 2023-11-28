@@ -4,7 +4,7 @@
 class ConvexHull_GrahamScan
 {	
 public:
-	ConvexHull_GrahamScan(std::vector<gp_Pnt> points):m_points(points){}
+    ConvexHull_GrahamScan(const std::vector<gp_Pnt> points) :m_points(points) {} 
 	~ConvexHull_GrahamScan() {}
     bool compute() {
         if (!check()) return false;
@@ -46,7 +46,10 @@ public:
         }
         std::swap(m_points[0], m_points[minIndex]);
     }
+    void setPoints(const std::vector<gp_Pnt>& points) { m_points = points; }
+
     std::vector<gp_Pnt> getResult() { return m_convexHull; }
+
     double toLeft(gp_Pnt prev, gp_Pnt current, gp_Pnt next) {
         return (gp_Vec(prev, current) ^ gp_Vec(prev, next)).Z();
     }

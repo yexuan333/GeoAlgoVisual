@@ -38,16 +38,6 @@
     </property>
    </widget>
   </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>952</width>
-     <height>21</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
     <string>toolBar</string>
@@ -58,14 +48,11 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionRun"/>
+   <addaction name="actionGrahamScan"/>
   </widget>
-  <action name="actionRun">
+  <action name="actionGrahamScan">
    <property name="text">
-    <string>Run</string>
-   </property>
-   <property name="menuRole">
-    <enum>QAction::NoRole</enum>
+    <string>GrahamScan</string>
    </property>
   </action>
  </widget>

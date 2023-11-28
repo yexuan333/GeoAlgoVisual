@@ -1,30 +1,20 @@
 #pragma once
 #include "pch.h"
+#include "GeoAlgo_V.h"
 #include "ch.h"
 
-class ConvexHull3D_V : public QObject
+class ConvexHull3D_V : public GeoAlgo_V
 {
 	Q_OBJECT
 public:
 	ConvexHull3D_V(const Handle(AIS_InteractiveContext)& contex, std::vector<gp_Pnt> points)
-		:m_points(points),m_contex(contex) {}
+		:GeoAlgo_V(contex),m_points(points){}
 	~ConvexHull3D_V() {}
 
-public Q_SLOTS:
-	void process();
-
-Q_SIGNALS:
-	void finished();
-	void error(QString err);
-	void updateView();
-	void clearView();
+	void process() override;
 
 private:
-	//void displayPoints();
-	//void displayline(gp_Pnt s, gp_Pnt e);
-	//void removeLastLine();
-	//void update(int time);
-	const Handle(AIS_InteractiveContext)& m_contex;
+	//const Handle(AIS_InteractiveContext)& m_contex;
 	std::vector<AIS_Shape*> m_aisConvex;
 	std::vector<gp_Pnt> m_points;
 };
