@@ -7,8 +7,7 @@ class ConvexHull3D_V : public GeoAlgo_V
 {
 	Q_OBJECT
 public:
-	ConvexHull3D_V(const Handle(AIS_InteractiveContext)& contex, std::vector<gp_Pnt> points)
-		:GeoAlgo_V(contex),m_points(points){}
+	ConvexHull3D_V(const Handle(AIS_InteractiveContext)& contex);
 	~ConvexHull3D_V() {}
 
 	void process() override;

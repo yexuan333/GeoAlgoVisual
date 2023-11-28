@@ -49,10 +49,19 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionGrahamScan"/>
+   <addaction name="actionIncremental"/>
   </widget>
   <action name="actionGrahamScan">
    <property name="text">
     <string>GrahamScan</string>
+   </property>
+  </action>
+  <action name="actionIncremental">
+   <property name="text">
+    <string>Incremental</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
  </widget>

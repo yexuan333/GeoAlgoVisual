@@ -26,6 +26,7 @@ private:
     void connectAlgoThread(GeoAlgo_V* algo, QThread* thread);
 private Q_SLOTS:
     void GrahamScanRun();
+    void IncrementalRun();
     void on_updateView();
     void on_clearView();
 private:
