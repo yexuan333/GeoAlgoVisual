@@ -1,3 +1,3 @@
-set (OpenCASCADE_DIR "E:/OpenCASCADE-7.7.0-vc14-64/opencascade-7.7.0-build" CACHE PATH "Path to Open CASCADE libraries.")
+set (OpenCASCADE_DIR "D:/OpenCASCADE-7.7.0-vc14-64/opencascade-7.7.0-build" CACHE PATH "Path to Open CASCADE libraries.")
 set (3RDPARTY_DLL_DIRS "${OpenCASCADE_DIR}/../freeimage-3.17.0-vc14-64/bin;${OpenCASCADE_DIR}/../freetype-2.5.5-vc14-64/bin;${OpenCASCADE_DIR}/../ffmpeg-3.3.4-64/bin;${OpenCASCADE_DIR}/../tbb_2021.5-vc14-64/bin;" CACHE STRING "Paths to external DLLs separated by semicolon (FreeImage, FreeType, etc.)")
-set (QT_PATH "E:/QT/6.5.3/msvc2019_64")
+set (QT_PATH "Z:/ProgramData/QT/6.5.3/msvc2019_64")

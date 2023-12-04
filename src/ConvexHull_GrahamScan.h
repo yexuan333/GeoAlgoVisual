@@ -4,6 +4,7 @@
 class ConvexHull_GrahamScan
 {	
 public:
+    ConvexHull_GrahamScan(){}
     ConvexHull_GrahamScan(const std::vector<gp_Pnt> points) :m_points(points) {} 
 	~ConvexHull_GrahamScan() {}
     bool compute() {

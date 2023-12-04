@@ -10,7 +10,7 @@
 #include "LogStream.h"
 #include "GeoAlgo_V.h"
 #include "ConvexHull_GrahamScan_V.h"
-#include "ConvexHull3D_V.h"
+#include "ConvexHull3D_Incremental_V.h"
 
 
 class MainWindow : public QMainWindow {

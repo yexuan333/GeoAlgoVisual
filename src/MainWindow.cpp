@@ -9,7 +9,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 #endif // !_DEBUG
     setTopView();
     connect(ui->actionGrahamScan, &QAction::triggered, this, &MainWindow::GrahamScanRun);
-    connect(ui->actionIncremental, &QAction::triggered, this, &MainWindow::GrahamScanRun);
+    connect(ui->actionIncremental, &QAction::triggered, this, &MainWindow::IncrementalRun);
 
     ui->textBrowser->document()->setMaximumBlockCount(9001);
     ui->textBrowser->viewport()->setAutoFillBackground(false);
@@ -41,7 +41,7 @@ void MainWindow::GrahamScanRun()
 void MainWindow::IncrementalRun() {
     on_clearView();
     auto thread = new QThread();
-    auto algo = new ConvexHull3D_V(ui->openGLWidget->Context());
+    auto algo = new ConvexHull3D_Incremental_V(ui->openGLWidget->Context());
     algo->moveToThread(thread);
     connectAlgoThread(algo, thread);
     thread->start();
