@@ -26,6 +26,8 @@ bool ConvexHull3D_Incremental::initTetrahedon()
 	m_index = 0;
 
 	auto p1 = m_points[m_index];
+	auto v1 = std::make_shared<HalfVertex>(p1);
+	v1->index = 0;
 	do
 	{
 		m_index++;
@@ -61,20 +63,18 @@ bool ConvexHull3D_Incremental::initTetrahedon()
 	bool isVisible = vec1.Crossed(vec2).Dot(vec3) > 0;
 	std::vector<HalfVertex_ptr> vs;
 	if (isVisible) {
-		auto v1 = std::make_shared<HalfVertex>(p1);
-		auto v2 = std::make_shared<HalfVertex>(p3);
-		auto v3 = std::make_shared<HalfVertex>(p2);
-		auto v4 = std::make_shared<HalfVertex>(p4);
+		auto v2 = std::make_shared<HalfVertex>(p3); v2->index = 2;
+		auto v3 = std::make_shared<HalfVertex>(p2); v3->index = 1;
+		auto v4 = std::make_shared<HalfVertex>(p4); v4->index = 3;
 		vs.push_back(v1);
 		vs.push_back(v2);
 		vs.push_back(v3);
 		vs.push_back(v4);
 	}
 	else {
-		auto v1 = std::make_shared<HalfVertex>(p1);
-		auto v2 = std::make_shared<HalfVertex>(p2);
-		auto v3 = std::make_shared<HalfVertex>(p3);
-		auto v4 = std::make_shared<HalfVertex>(p4);
+		auto v2 = std::make_shared<HalfVertex>(p2); v2->index = 1;
+		auto v3 = std::make_shared<HalfVertex>(p3); v3->index = 2;
+		auto v4 = std::make_shared<HalfVertex>(p4); v4->index = 3;
 		vs.push_back(v1);
 		vs.push_back(v2);
 		vs.push_back(v3);
@@ -93,14 +93,16 @@ bool ConvexHull3D_Incremental::initTetrahedon()
 	e1->face = face;
 	e2->face = face;
 	e3->face = face;
-
-	m_dcel.faces.push_back(face);
-	addNewFace(e1, vs[3]);
-	addNewFace(e2, vs[3]);
-	addNewFace(e3, vs[3]);
+	face->index = 0;
+	addFace(face);
+	addNewFace(e1, vs[3],nullptr, nullptr);
+	addNewFace(e2, vs[3],e1, nullptr);
+	addNewFace(e3, vs[3],e2,e1);
 }
-
-HalfFace_ptr ConvexHull3D_Incremental::addNewFace(HalfEdge_ptr current, HalfVertex_ptr newVertex) {
+void ConvexHull3D_Incremental::addFace(HalfFace_ptr face) {
+	m_dcel.faces.push_back(face);
+}
+HalfFace_ptr ConvexHull3D_Incremental::addNewFace(HalfEdge_ptr current, HalfVertex_ptr newVertex, HalfEdge_ptr prev, HalfEdge_ptr next) {
 	auto fe1 = std::make_shared<HalfEdge>(current->next->origin);
 	auto fe2 = std::make_shared<HalfEdge>(current->origin);
 	auto fe3 = std::make_shared<HalfEdge>(newVertex);
@@ -114,14 +116,18 @@ HalfFace_ptr ConvexHull3D_Incremental::addNewFace(HalfEdge_ptr current, HalfVert
 	fe2->next = fe3; fe3->prev = fe2;
 	fe3->next = fe1; fe1->prev = fe3;
 
-	if(current->prev->twin != nullptr && current->prev->twin->face->vaild){
-		current->prev->twin->prev->twin = fe2; fe2->twin = current->prev->twin->prev;
-	}
-	if (current->next->twin != nullptr && current->next->twin->face->vaild) {
-		current->next->twin->next->twin = fe3; fe3->twin = current->next->twin->next;
+	if(prev != nullptr){
+		fe2->twin = prev->twin->prev;
+		prev->twin->prev->twin = fe2;
 	}
 
-	m_dcel.faces.push_back(face);
+	if (next != nullptr) {
+		fe3->twin = next->twin->next;
+		next->twin->next->twin = fe3;
+	}
+	
+	face->index = m_dcel.faces.size();
+	addFace(face);
 	return face;
 }
 
@@ -157,43 +163,89 @@ bool ConvexHull3D_Incremental::compute() {
 DCEL ConvexHull3D_Incremental::getResult() {
 	return m_dcel;
 }
-void ConvexHull3D_Incremental::addPoint(int index) {
-	if (m_Pconflict[index].empty()) return;
 
-	std::vector<HalfEdge_ptr> horizon;
+int ConvexHull3D_Incremental::find(std::vector<HalfEdge_ptr> H, int index)
+{
+	int i, s;
+	for (s = 1; s < (int)H.size(); s <<= 1);
+	for (i = 0; s; s >>= 1)
+		if (i + s < (int)H.size() && H[i + s]->origin->index <= index)
+			i += s;
+	return i;
+}
+
+void ConvexHull3D_Incremental::findHorizon(int index, std::vector<HalfEdge_ptr>& horizon) {
 	for (int i = 0; i < m_Pconflict[index].size(); ++i)
 	{
 		auto conflictFace = m_dcel.faces[m_Pconflict[index][i]];
+		if (!conflictFace->vaild) continue;
+
 		conflictFace->vaild = false;
 		auto currentEdge = conflictFace->edge;
 		do
 		{
-			if (!currentEdge->twin->face->viuslPoint(m_points[index]) <= 0) {
+			// if twin face don't visual point , the edge is horizon
+			if (currentEdge->twin->face->viuslPoint(m_points[index]) <= 0) {
 				horizon.push_back(currentEdge->twin);
 			}
 			currentEdge = currentEdge->next;
 		} while (currentEdge != conflictFace->edge);
 	}
+}
 
-	for (int i = 0; i < horizon.size(); i++) {
-		auto newV = std::make_shared<HalfVertex>(m_points[index]);
-		auto sideFace = horizon[i]->face;
-		auto removeFace = horizon[i]->twin->face;
-		auto newFace = addNewFace(horizon[i], newV);
+void ConvexHull3D_Incremental::handleAddCoplanarFace(HalfEdge_ptr horizon, HalfFace_ptr newFace, HalfFace_ptr sideFace) {
+	// coplanar
+	horizon->twin->next->prev = horizon->prev;
+	horizon->prev->next = horizon->twin->next;
+
+	horizon->twin->prev->next = horizon->next;
+	horizon->next->prev = horizon->twin->prev;
+
+	//reset face links
+	for (auto iter = horizon->twin->next; iter != horizon->next; iter = iter->next)
+		iter->face = sideFace;
+
+	newFace->vaild = false;
+	//newFace->edge = horizonSorted[i]->next;
+}
+
+void ConvexHull3D_Incremental::addPoint(int index) {
+	if (m_Pconflict[index].empty()) return;
+	std::vector<HalfEdge_ptr> horizon;
+	findHorizon(index, horizon);
+
+	std::vector<HalfEdge_ptr> horizonSorted;
+	if (horizon.size()) {
+		std::sort(horizon.begin(), horizon.end(), [](HalfEdge_ptr a, HalfEdge_ptr b) {
+			return a->origin->index < b->origin->index;
+			});
+		int pos = 0;
+		do
+		{
+			horizonSorted.push_back(horizon[pos]);
+			pos = find(horizon, horizonSorted[horizonSorted.size() - 1]->next->origin->index);
+		} while (pos != 0);
+	}
+	else return;
+
+	auto newV = std::make_shared<HalfVertex>(m_points[index]);
+	newV->index = index;
+	for (int i = 0; i < horizonSorted.size(); i++) {
+		auto sideFace = horizonSorted[i]->face;
+		auto removeFace = horizonSorted[i]->twin->face;
+		HalfFace_ptr newFace;
+		if (i == 0) {
+			newFace = addNewFace(horizonSorted[i], newV,nullptr, nullptr);
+		}
+		else if (i == horizonSorted.size() - 1) {
+			newFace = addNewFace(horizonSorted[i], newV, horizonSorted[i-1], horizonSorted[0]);
+		}
+		else {
+			newFace = addNewFace(horizonSorted[i], newV, horizonSorted[i - 1], nullptr);
+		}
 
 		if (sideFace->viuslPoint(m_points[index]) == 0) {
-			// coplanar
-			horizon[i]->twin->next->prev = horizon[i]->prev;
-			horizon[i]->prev->next = horizon[i]->twin->next;
-
-			horizon[i]->twin->prev->next = horizon[i]->next;
-			horizon[i]->next->prev = horizon[i]->twin->prev;
-
-			//reset face links
-			for (auto iter = horizon[i]->twin->next; iter != horizon[i]->next; iter = iter->next)
-				iter->face = sideFace;
-
-			newFace->edge = horizon[i]->next;
+			handleAddCoplanarFace(horizonSorted[i], newFace, sideFace);
 		}
 		else {
 			std::set<int> newConflict;

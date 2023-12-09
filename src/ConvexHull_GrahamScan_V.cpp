@@ -41,11 +41,6 @@ void ConvexHull_GrahamScan_V::displayline(gp_Pnt s, gp_Pnt e)
 	m_contex->Display(ais, false);
 }
 
-void ConvexHull_GrahamScan_V::update(int time) {
-	Q_EMIT updateView();
-	Sleep(time);
-}
-
 void ConvexHull_GrahamScan_V::process() {
 	std::cout << "Start ConvexHull_GrahamScan...." << std::endl;
 

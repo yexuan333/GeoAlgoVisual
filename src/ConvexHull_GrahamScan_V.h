@@ -13,6 +13,5 @@ private:
 	void displayPoints();
 	void displayline(gp_Pnt s, gp_Pnt e);
 	void removeLastLine();
-	void update(int time);
 	std::vector<AIS_Shape*> m_aisConvex;
 };

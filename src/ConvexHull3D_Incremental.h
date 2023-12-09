@@ -13,8 +13,8 @@ using HalfVertex_ptr = std::shared_ptr<HalfVertex>;
 class HalfVertex
 {
 public:
-    HalfVertex(){}
     HalfVertex(gp_Pnt p):point(p){}
+    int index = -1;
     gp_Pnt point;
     std::vector<int> conflict;
 };
@@ -38,12 +38,13 @@ public:
     HalfFace(HalfEdge_ptr e){
         edge = e;
     }
-    bool viuslPoint(gp_Pnt p) {
+    double viuslPoint(gp_Pnt p) {
         auto v1 = gp_Vec(edge->prev->origin->point, edge->origin->point);
         auto v2 = gp_Vec(edge->origin->point, edge->next->origin->point);
         auto v3 = gp_Vec(edge->origin->point, p);
         return v1.Crossed(v2).Dot(v3);
     }
+    int index = -1;
     HalfEdge_ptr edge;
     std::vector<int> conflict;
     bool vaild = true;
@@ -63,6 +64,7 @@ public:
 class ConvexHull3D_Incremental
 {
 public:
+    ConvexHull3D_Incremental(){}
     ConvexHull3D_Incremental(std::vector<gp_Pnt> points);
     ~ConvexHull3D_Incremental(){}
     bool compute();
@@ -72,8 +74,12 @@ public:
     bool isDuplicate(gp_Pnt p1, gp_Pnt p2);
     bool isCollinear(gp_Pnt p1, gp_Pnt p2, gp_Pnt p3);
     bool isCoplanar(gp_Pnt p1, gp_Pnt p2, gp_Pnt p3, gp_Pnt p4);
-    HalfFace_ptr addNewFace(HalfEdge_ptr current, HalfVertex_ptr newVertex);
+    HalfFace_ptr addNewFace(HalfEdge_ptr current, HalfVertex_ptr newVertex, HalfEdge_ptr prev, HalfEdge_ptr next);
+    virtual void addFace(HalfFace_ptr face);
+    virtual void handleAddCoplanarFace(HalfEdge_ptr horizon, HalfFace_ptr newFace, HalfFace_ptr sideFace);
+    virtual void findHorizon(int index, std::vector<HalfEdge_ptr>& horizon);
     void addPoint(int index);
+    int find(std::vector<HalfEdge_ptr> H, int index);
 protected:
     std::vector<gp_Pnt> m_points;
     std::vector<std::vector<int>> m_Pconflict;
